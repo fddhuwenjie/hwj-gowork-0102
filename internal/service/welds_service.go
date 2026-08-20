@@ -97,9 +97,6 @@ func (s *WeldService) Update(ctx context.Context, item *domain.Weld, expectedVer
 		if err != nil {
 			return err
 		}
-		if before.Version != expectedVersion {
-			return store.ErrVersionConflict
-		}
 		if err := s.repo.Update(ctx, tx, item, expectedVersion); err != nil {
 			return err
 		}
