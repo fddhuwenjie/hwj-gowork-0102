@@ -65,10 +65,17 @@ func (r WeldRepository) Update(ctx context.Context, q Queryer, item *domain.Weld
 	args = append(args, item.EquipmentID)
 	args = append(args, item.MethodVersionID)
 	args = append(args, item.BatchID)
-	args = append(args, item.ID)
-	_, err := q.ExecContext(ctx, "UPDATE welds SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, number = ?, equipment_id = ?, method_version_id = ?, batch_id = ? WHERE id = ?", args...)
+	args = append(args, item.ID, expectedVersion)
+	res, err := q.ExecContext(ctx, "UPDATE welds SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, number = ?, equipment_id = ?, method_version_id = ?, batch_id = ? WHERE id = ? AND version = ?", args...)
 	if err != nil {
 		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return ErrVersionConflict
 	}
 	item.Version = expectedVersion + 1
 	return nil
