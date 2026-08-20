@@ -1,0 +1,16 @@
+services:
+  weld-ndt:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: weld-ndt:local
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      DB_PATH: "/data/weld-ndt.db"
+      GOTOOLCHAIN: "local"
+    volumes:
+      - weld-ndt-data:/data
+volumes:
+  weld-ndt-data:
