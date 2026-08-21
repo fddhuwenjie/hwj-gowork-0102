@@ -79,6 +79,7 @@ func (s *BackgroundTaskService) Get(ctx context.Context, id string) (*domain.Bac
 }
 
 func (s *BackgroundTaskService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.BackgroundTask, int64, error) {
+func (s *BackgroundTaskService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.BackgroundTask, int64, error) {
 	// 直接透传页码：仓储层会调用 page.Normalize() 并按 (page-1)*size 计算 OFFSET。
 	// 此前对 page 自增会使每个窗口多偏移一页，导致最早记录被跳过、相邻窗口断档。
 	return s.repo.List(ctx, s.store.DB, filter, page, sort)

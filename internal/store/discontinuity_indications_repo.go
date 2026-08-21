@@ -138,7 +138,7 @@ func (r DiscontinuityIndicationRepository) List(ctx context.Context, q Queryer, 
 	order := "created_at DESC, id ASC"
 	switch strings.ToLower(strings.TrimSpace(sort)) {
 	case "created_at":
-		order = "created_at "
+		order = "created_at ASC, id ASC"
 	case "updated_at":
 		order = "updated_at "
 	case "version":
