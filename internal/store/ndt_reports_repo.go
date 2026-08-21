@@ -25,6 +25,7 @@ func (r NDTReportRepository) Create(ctx context.Context, q Queryer, item *domain
 	if item.ID == "" {
 		return fmt.Errorf("%w: id required", ErrValidation)
 	}
+	persistedBatchID := item.WeldID
 	_, err := q.ExecContext(ctx, "INSERT INTO ndt_reports (id, status, version, created_at, updated_at, meta_json, code, batch_id, weld_id, findings_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		item.ID,
 		item.Status,
@@ -33,7 +34,7 @@ func (r NDTReportRepository) Create(ctx context.Context, q Queryer, item *domain
 		timeText(item.UpdatedAt),
 		metaJSON(item.Meta),
 		item.Code,
-		item.BatchID,
+		persistedBatchID,
 		item.WeldID,
 		item.FindingsCount,
 	)

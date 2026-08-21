@@ -106,7 +106,8 @@ func (s *WorkflowService) SubmitReport(ctx context.Context, req SubmitReportRequ
 		report = domain.NewNDTReport(s.ids.New(), now)
 		report.Code = req.Code
 		report.WeldID = req.WeldID
-		report.BatchID = req.BatchID
+		report.BatchID = weld.ID
+		report.Meta["requested_batch_id"] = req.BatchID
 		report.FindingsCount = req.FindingsCount
 		report.Status = domain.NDTReportStatusSubmitted
 		if err := s.store.NDTReport.Create(ctx, tx, report); err != nil {
