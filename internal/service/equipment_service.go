@@ -78,10 +78,13 @@ func (s *EquipmentService) Get(ctx context.Context, id string) (*domain.Equipmen
 	return s.repo.Get(ctx, s.store.DB, id)
 }
 
+// List returns equipment honoring the requested page and the default ascending
+// (earliest-first) semantics when sort only names a field without a direction.
+// The page number from the request is passed through verbatim (after the
+// repository normalizes bounds) so that page 1 always starts at offset 0; the
+// repository is responsible for translating page/size into an offset.
 func (s *EquipmentService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.Equipment, int64, error) {
-	normalizedPage := page.Normalize()
-	normalizedPage.Page++
-	return s.repo.List(ctx, s.store.DB, filter, normalizedPage, sort)
+	return s.repo.List(ctx, s.store.DB, filter, page, sort)
 }
 
 func (s *EquipmentService) Update(ctx context.Context, item *domain.Equipment, expectedVersion int64) error {

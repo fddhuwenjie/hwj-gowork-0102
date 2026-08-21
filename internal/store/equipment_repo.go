@@ -123,18 +123,34 @@ func (r EquipmentRepository) List(ctx context.Context, q Queryer, filter map[str
 			args = append(args, v)
 		}
 	}
+	// Sorting: when sort names only a field (no explicit direction), the
+	// default direction is ASC so that the earliest records come first. This
+	// matches the "default ascending" contract for maintenance records viewed
+	// by creation time. An explicit "desc" still wins for callers that want the
+	// newest records first. A stable tiebreaker on id keeps paging deterministic
+	// so consecutive pages never overlap or skip rows.
 	order := "created_at DESC, id ASC"
 	switch strings.ToLower(strings.TrimSpace(sort)) {
-	case "created_at":
+	case "created_at", "created_at asc":
+		order = "created_at ASC, id ASC"
+	case "created_at desc":
 		order = "created_at DESC, id ASC"
-	case "updated_at":
-		order = "updated_at "
-	case "version":
-		order = "version "
-	case "status":
-		order = "status "
-	case "id":
-		order = "id "
+	case "updated_at", "updated_at asc":
+		order = "updated_at ASC, id ASC"
+	case "updated_at desc":
+		order = "updated_at DESC, id ASC"
+	case "version", "version asc":
+		order = "version ASC, id ASC"
+	case "version desc":
+		order = "version DESC, id ASC"
+	case "status", "status asc":
+		order = "status ASC, id ASC"
+	case "status desc":
+		order = "status DESC, id ASC"
+	case "id", "id asc":
+		order = "id ASC"
+	case "id desc":
+		order = "id DESC"
 	default:
 		order = "created_at DESC, id ASC"
 	}
