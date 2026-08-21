@@ -69,8 +69,8 @@ func (r BackgroundTaskRepository) Update(ctx context.Context, q Queryer, item *d
 	args = append(args, item.MaxAttempts)
 	args = append(args, timeTextPtr(item.NextRunAt))
 	args = append(args, item.LastError)
-	args = append(args, item.ID)
-	res, err := q.ExecContext(ctx, "UPDATE background_tasks SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, task_type = ?, payload_json = ?, attempts = ?, max_attempts = ?, next_run_at = ?, last_error = ? WHERE id = ?", args...)
+	args = append(args, item.ID, expectedVersion)
+	res, err := q.ExecContext(ctx, "UPDATE background_tasks SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, task_type = ?, payload_json = ?, attempts = ?, max_attempts = ?, next_run_at = ?, last_error = ? WHERE id = ? AND version = ?", args...)
 	if err != nil {
 		return err
 	}

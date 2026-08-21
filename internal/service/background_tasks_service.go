@@ -97,8 +97,14 @@ func (s *BackgroundTaskService) Update(ctx context.Context, item *domain.Backgro
 		if err != nil {
 			return err
 		}
-		effectiveVersion := before.Version
-		expectedVersion = effectiveVersion
+		// Preserve version isolation between this service-level read and the
+		// repository's conditional UPDATE: the caller's expectedVersion must be
+		// checked against the version just read, so a payload carrying a stale
+		// version conflicts instead of silently overwriting the latest data.
+		// A payload carrying the current version still matches and commits.
+		if before.Version != expectedVersion {
+			return store.ErrVersionConflict
+		}
 		if err := s.repo.Update(ctx, tx, item, expectedVersion); err != nil {
 			return err
 		}
