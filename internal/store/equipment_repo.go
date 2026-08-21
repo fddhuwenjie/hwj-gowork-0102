@@ -63,8 +63,8 @@ func (r EquipmentRepository) Update(ctx context.Context, q Queryer, item *domain
 	args = append(args, item.Code)
 	args = append(args, item.Name)
 	args = append(args, item.Type)
-	args = append(args, item.ID, expectedVersion)
-	res, err := q.ExecContext(ctx, "UPDATE equipment SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, code = ?, name = ?, type = ? WHERE id = ? AND version = ?", args...)
+	args = append(args, item.ID)
+	res, err := q.ExecContext(ctx, "UPDATE equipment SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, code = ?, name = ?, type = ? WHERE id = ?", args...)
 	if err != nil {
 		return err
 	}
