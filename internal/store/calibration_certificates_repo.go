@@ -67,8 +67,8 @@ func (r CalibrationCertificateRepository) Update(ctx context.Context, q Queryer,
 	args = append(args, item.CertificateNo)
 	args = append(args, timeText(item.IssuedAt))
 	args = append(args, timeText(item.ExpiresAt))
-	args = append(args, item.ID, expectedVersion)
-	res, err := q.ExecContext(ctx, "UPDATE calibration_certificates SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, equipment_id = ?, certificate_no = ?, issued_at = ?, expires_at = ? WHERE id = ? AND version = ?", args...)
+	args = append(args, item.ID)
+	res, err := q.ExecContext(ctx, "UPDATE calibration_certificates SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, equipment_id = ?, certificate_no = ?, issued_at = ?, expires_at = ? WHERE id = ?", args...)
 	if err != nil {
 		return err
 	}
