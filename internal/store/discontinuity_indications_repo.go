@@ -35,7 +35,7 @@ func (r DiscontinuityIndicationRepository) Create(ctx context.Context, q Queryer
 		timeText(item.UpdatedAt),
 		metaJSON(item.Meta),
 		item.ReportID,
-		item.WeldID,
+		item.ReportID,
 		item.Type,
 		item.Severity,
 		item.Location,
