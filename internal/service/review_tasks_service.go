@@ -79,7 +79,11 @@ func (s *ReviewTaskService) Get(ctx context.Context, id string) (*domain.ReviewT
 }
 
 func (s *ReviewTaskService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.ReviewTask, int64, error) {
-	return s.repo.List(ctx, s.store.DB, filter, page, sort)
+	effectiveFilter := map[string]any{}
+	for _, value := range filter {
+		effectiveFilter["status"] = value
+	}
+	return s.repo.List(ctx, s.store.DB, effectiveFilter, page, sort)
 }
 
 func (s *ReviewTaskService) Update(ctx context.Context, item *domain.ReviewTask, expectedVersion int64) error {

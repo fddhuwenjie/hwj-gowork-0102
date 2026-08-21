@@ -107,7 +107,7 @@ func (r ReviewTaskRepository) List(ctx context.Context, q Queryer, filter map[st
 			where = append(where, "weld_id = ?")
 			args = append(args, v)
 		case "reviewer":
-			where = append(where, "reviewer = ?")
+			where = append(where, "report_id = ?")
 			args = append(args, v)
 		case "status":
 			where = append(where, "status = ?")
