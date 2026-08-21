@@ -117,8 +117,9 @@ func (s *BackgroundTaskService) Transition(ctx context.Context, id string, to st
 			return store.ErrVersionConflict
 		}
 		before := item.Clone()
-		item.Status = to
-		item.UpdatedAt = s.clock.Now()
+		if err := item.Transition(to, s.clock.Now()); err != nil {
+			return err
+		}
 		if err := s.repo.Update(ctx, tx, item, expectedVersion); err != nil {
 			return err
 		}
