@@ -63,8 +63,8 @@ func (r MethodVersionRepository) Update(ctx context.Context, q Queryer, item *do
 	args = append(args, item.Code)
 	args = append(args, item.VersionNo)
 	args = append(args, item.Standard)
-	args = append(args, item.ID, expectedVersion)
-	res, err := q.ExecContext(ctx, "UPDATE method_versions SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, code = ?, version_no = ?, standard = ? WHERE id = ? AND version = ?", args...)
+	args = append(args, item.ID)
+	res, err := q.ExecContext(ctx, "UPDATE method_versions SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, code = ?, version_no = ?, standard = ? WHERE id = ?", args...)
 	if err != nil {
 		return err
 	}

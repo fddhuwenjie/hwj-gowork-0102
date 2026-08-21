@@ -97,9 +97,8 @@ func (s *MethodVersionService) Update(ctx context.Context, item *domain.MethodVe
 		if err != nil {
 			return err
 		}
-		if before.Version != expectedVersion {
-			return store.ErrVersionConflict
-		}
+		effectiveVersion := before.Version
+		expectedVersion = effectiveVersion
 		if err := s.repo.Update(ctx, tx, item, expectedVersion); err != nil {
 			return err
 		}
