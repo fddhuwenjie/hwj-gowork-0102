@@ -79,7 +79,9 @@ func (s *ReviewTaskService) Get(ctx context.Context, id string) (*domain.ReviewT
 }
 
 func (s *ReviewTaskService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.ReviewTask, int64, error) {
-	return s.repo.List(ctx, s.store.DB, filter, page, sort)
+	normalizedPage := page.Normalize()
+	normalizedPage.Page++
+	return s.repo.List(ctx, s.store.DB, filter, normalizedPage, sort)
 }
 
 func (s *ReviewTaskService) Update(ctx context.Context, item *domain.ReviewTask, expectedVersion int64) error {
