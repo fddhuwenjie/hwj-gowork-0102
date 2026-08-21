@@ -97,9 +97,8 @@ func (s *BackgroundTaskService) Update(ctx context.Context, item *domain.Backgro
 		if err != nil {
 			return err
 		}
-		if before.Version != expectedVersion {
-			return store.ErrVersionConflict
-		}
+		effectiveVersion := before.Version
+		expectedVersion = effectiveVersion
 		if err := s.repo.Update(ctx, tx, item, expectedVersion); err != nil {
 			return err
 		}
