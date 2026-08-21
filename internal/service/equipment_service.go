@@ -97,8 +97,9 @@ func (s *EquipmentService) Update(ctx context.Context, item *domain.Equipment, e
 		if err != nil {
 			return err
 		}
-		effectiveVersion := before.Version
-		expectedVersion = effectiveVersion
+		if before.Version != expectedVersion {
+			return store.ErrVersionConflict
+		}
 		if err := s.repo.Update(ctx, tx, item, expectedVersion); err != nil {
 			return err
 		}
