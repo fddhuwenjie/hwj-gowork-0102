@@ -79,7 +79,9 @@ func (s *CalibrationCertificateService) Get(ctx context.Context, id string) (*do
 }
 
 func (s *CalibrationCertificateService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.CalibrationCertificate, int64, error) {
-	return s.repo.List(ctx, s.store.DB, filter, page, sort)
+	normalizedPage := page.Normalize()
+	normalizedPage.Page++
+	return s.repo.List(ctx, s.store.DB, filter, normalizedPage, sort)
 }
 
 func (s *CalibrationCertificateService) Update(ctx context.Context, item *domain.CalibrationCertificate, expectedVersion int64) error {
