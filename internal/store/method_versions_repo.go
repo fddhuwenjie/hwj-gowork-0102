@@ -123,20 +123,25 @@ func (r MethodVersionRepository) List(ctx context.Context, q Queryer, filter map
 			args = append(args, v)
 		}
 	}
-	order := "created_at DESC, id ASC"
+	// Method version release history is presented oldest-first: the first page
+	// must start at the earliest record and each subsequent window continues
+	// strictly after the previous one, so a full forward traversal covers
+	// every record exactly once. A deterministic id tiebreaker keeps the
+	// ordering stable across pages when rows share a created_at timestamp.
+	order := "created_at ASC, id ASC"
 	switch strings.ToLower(strings.TrimSpace(sort)) {
 	case "created_at":
-		order = "created_at DESC, id ASC"
+		order = "created_at ASC, id ASC"
 	case "updated_at":
-		order = "updated_at "
+		order = "updated_at ASC, id ASC"
 	case "version":
-		order = "version "
+		order = "version ASC, id ASC"
 	case "status":
-		order = "status "
+		order = "status ASC, id ASC"
 	case "id":
-		order = "id "
+		order = "id ASC"
 	default:
-		order = "created_at DESC, id ASC"
+		order = "created_at ASC, id ASC"
 	}
 	countSQL := "SELECT COUNT(*) FROM method_versions WHERE " + strings.Join(where, " AND ")
 	var total int64
