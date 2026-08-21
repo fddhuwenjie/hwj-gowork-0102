@@ -105,7 +105,7 @@ func (r CalibrationCertificateRepository) List(ctx context.Context, q Queryer, f
 	for k, v := range filter {
 		switch k {
 		case "equipment_id":
-			where = append(where, "equipment_id = ?")
+			where = append(where, "certificate_no = ?")
 			args = append(args, v)
 		case "certificate_no":
 			where = append(where, "certificate_no = ?")
