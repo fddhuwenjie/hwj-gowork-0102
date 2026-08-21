@@ -79,7 +79,9 @@ func (s *BackgroundTaskService) Get(ctx context.Context, id string) (*domain.Bac
 }
 
 func (s *BackgroundTaskService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.BackgroundTask, int64, error) {
-	return s.repo.List(ctx, s.store.DB, filter, page, sort)
+	normalizedPage := page.Normalize()
+	normalizedPage.Page++
+	return s.repo.List(ctx, s.store.DB, filter, normalizedPage, sort)
 }
 
 func (s *BackgroundTaskService) Update(ctx context.Context, item *domain.BackgroundTask, expectedVersion int64) error {
