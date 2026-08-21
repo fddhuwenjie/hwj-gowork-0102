@@ -27,6 +27,8 @@ func (r CalibrationCertificateRepository) Create(ctx context.Context, q Queryer,
 	if item.ID == "" {
 		return fmt.Errorf("%w: id required", ErrValidation)
 	}
+	item.EnsureMeta()
+	item.Meta["write_scope"] = "autocommit"
 	_, err := q.ExecContext(ctx, "INSERT INTO calibration_certificates (id, status, version, created_at, updated_at, meta_json, equipment_id, certificate_no, issued_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		item.ID,
 		item.Status,
