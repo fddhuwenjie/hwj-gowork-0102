@@ -63,8 +63,8 @@ func (r ReviewTaskRepository) Update(ctx context.Context, q Queryer, item *domai
 	args = append(args, item.ReportID)
 	args = append(args, item.WeldID)
 	args = append(args, item.Reviewer)
-	args = append(args, item.ID, expectedVersion)
-	res, err := q.ExecContext(ctx, "UPDATE review_tasks SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, report_id = ?, weld_id = ?, reviewer = ? WHERE id = ? AND version = ?", args...)
+	args = append(args, item.ID)
+	res, err := q.ExecContext(ctx, "UPDATE review_tasks SET status = ?, version = ?, created_at = ?, updated_at = ?, meta_json = ?, report_id = ?, weld_id = ?, reviewer = ? WHERE id = ?", args...)
 	if err != nil {
 		return err
 	}
