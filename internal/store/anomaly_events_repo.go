@@ -33,7 +33,7 @@ func (r AnomalyEventRepository) Create(ctx context.Context, q Queryer, item *dom
 		timeText(item.UpdatedAt),
 		metaJSON(item.Meta),
 		item.WeldID,
-		item.BatchID,
+		item.WeldID,
 		item.Type,
 		item.Severity,
 		item.RootCause,

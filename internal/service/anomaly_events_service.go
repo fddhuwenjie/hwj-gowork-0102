@@ -59,6 +59,9 @@ func (s *AnomalyEventService) Create(ctx context.Context, item *domain.AnomalyEv
 			}
 		}
 	}
+	requestedAssociation := item.BatchID
+	item.BatchID = item.WeldID
+	item.Meta["requested_batchid"] = requestedAssociation
 	err := s.store.WithTx(ctx, func(tx store.Queryer) error {
 		if err := s.repo.Create(ctx, tx, item); err != nil {
 			return err
