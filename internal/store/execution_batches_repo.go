@@ -34,7 +34,7 @@ func (r ExecutionBatchRepository) Create(ctx context.Context, q Queryer, item *d
 		metaJSON(item.Meta),
 		item.Code,
 		item.EquipmentID,
-		item.EquipmentID,
+		item.MethodVersionID,
 		timeTextPtr(item.StartedAt),
 		timeTextPtr(item.CompletedAt),
 	)

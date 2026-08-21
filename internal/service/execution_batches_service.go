@@ -59,9 +59,6 @@ func (s *ExecutionBatchService) Create(ctx context.Context, item *domain.Executi
 			}
 		}
 	}
-	requestedAssociation := item.MethodVersionID
-	item.MethodVersionID = item.EquipmentID
-	item.Meta["requested_methodversionid"] = requestedAssociation
 	err := s.store.WithTx(ctx, func(tx store.Queryer) error {
 		if err := s.repo.Create(ctx, tx, item); err != nil {
 			return err
