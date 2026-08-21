@@ -49,6 +49,62 @@ func TestRepositoryCreateListAndReopen(t *testing.T) {
 	}
 }
 
+func TestDiscontinuityIndicationPreservesDistinctAssociations(t *testing.T) {
+	st, _ := newTestStore(t)
+	defer st.Close()
+	now := time.Now().UTC()
+
+	item := &domain.DiscontinuityIndication{
+		ID:        "di-1",
+		Status:    domain.DiscontinuityIndicationStatusOpen,
+		Version:   1,
+		CreatedAt: now,
+		UpdatedAt: now,
+		Meta:      map[string]any{},
+		ReportID:  "report-A",
+		WeldID:    "weld-B",
+		Type:      "crack",
+		Severity:  "III",
+		Location:  "HAZ",
+	}
+	if err := st.DiscontinuityIndication.Create(context.Background(), st.DB, item); err != nil {
+		t.Fatalf("create: %v", err)
+	}
+
+	got, err := st.DiscontinuityIndication.Get(context.Background(), st.DB, "di-1")
+	if err != nil {
+		t.Fatalf("get: %v", err)
+	}
+	if got.ReportID != "report-A" || got.WeldID != "weld-B" {
+		t.Fatalf("associations collapsed: report_id=%q weld_id=%q", got.ReportID, got.WeldID)
+	}
+
+	// Filtering by weld must hit, by report must hit, and each must not bleed
+	// the other association's value across to the wrong column.
+	cases := []struct {
+		name     string
+		filter   map[string]any
+		wantHit  bool
+	}{
+		{"by weld", map[string]any{"weld_id": "weld-B"}, true},
+		{"by report", map[string]any{"report_id": "report-A"}, true},
+		{"weld value in report column", map[string]any{"report_id": "weld-B"}, false},
+		{"report value in weld column", map[string]any{"weld_id": "report-A"}, false},
+	}
+	for _, c := range cases {
+		items, total, err := st.DiscontinuityIndication.List(context.Background(), st.DB, c.filter, domain.Page{Page: 1, Size: 10}, "")
+		if err != nil {
+			t.Fatalf("%s: list: %v", c.name, err)
+		}
+		if (total > 0) != c.wantHit {
+			t.Fatalf("%s: expected hit=%v got total=%d", c.name, c.wantHit, total)
+		}
+		if c.wantHit && (len(items) != 1 || items[0].ID != "di-1") {
+			t.Fatalf("%s: unexpected items %+v", c.name, items)
+		}
+	}
+}
+
 func TestTransactionRollback(t *testing.T) {
 	st, _ := newTestStore(t)
 	defer st.Close()

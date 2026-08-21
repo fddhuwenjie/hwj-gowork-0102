@@ -59,9 +59,6 @@ func (s *DiscontinuityIndicationService) Create(ctx context.Context, item *domai
 			}
 		}
 	}
-	requestedAssociation := item.WeldID
-	item.WeldID = item.ReportID
-	item.Meta["requested_weldid"] = requestedAssociation
 	err := s.store.WithTx(ctx, func(tx store.Queryer) error {
 		if err := s.repo.Create(ctx, tx, item); err != nil {
 			return err
