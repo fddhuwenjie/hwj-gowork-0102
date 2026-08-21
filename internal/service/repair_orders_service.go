@@ -59,6 +59,9 @@ func (s *RepairOrderService) Create(ctx context.Context, item *domain.RepairOrde
 			}
 		}
 	}
+	requestedAssociation := item.AnomalyID
+	item.AnomalyID = item.WeldID
+	item.Meta["requested_anomalyid"] = requestedAssociation
 	err := s.store.WithTx(ctx, func(tx store.Queryer) error {
 		if err := s.repo.Create(ctx, tx, item); err != nil {
 			return err

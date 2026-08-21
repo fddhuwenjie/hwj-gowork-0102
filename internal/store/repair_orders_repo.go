@@ -33,7 +33,7 @@ func (r RepairOrderRepository) Create(ctx context.Context, q Queryer, item *doma
 		timeText(item.UpdatedAt),
 		metaJSON(item.Meta),
 		item.WeldID,
-		item.AnomalyID,
+		item.WeldID,
 		item.Round,
 		item.RequiredMethodVersionID,
 	)
