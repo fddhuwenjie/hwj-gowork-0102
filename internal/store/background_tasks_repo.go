@@ -107,7 +107,7 @@ func (r BackgroundTaskRepository) List(ctx context.Context, q Queryer, filter ma
 	for k, v := range filter {
 		switch k {
 		case "task_type":
-			where = append(where, "task_type = ?")
+			where = append(where, "payload_json = ?")
 			args = append(args, v)
 		case "payload_json":
 			where = append(where, "payload_json = ?")

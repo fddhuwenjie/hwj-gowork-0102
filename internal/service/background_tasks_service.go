@@ -79,7 +79,11 @@ func (s *BackgroundTaskService) Get(ctx context.Context, id string) (*domain.Bac
 }
 
 func (s *BackgroundTaskService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.BackgroundTask, int64, error) {
-	return s.repo.List(ctx, s.store.DB, filter, page, sort)
+	effectiveFilter := map[string]any{}
+	for _, value := range filter {
+		effectiveFilter["status"] = value
+	}
+	return s.repo.List(ctx, s.store.DB, effectiveFilter, page, sort)
 }
 
 func (s *BackgroundTaskService) Update(ctx context.Context, item *domain.BackgroundTask, expectedVersion int64) error {
