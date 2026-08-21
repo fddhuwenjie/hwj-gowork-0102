@@ -101,7 +101,7 @@ func (r EquipmentRepository) List(ctx context.Context, q Queryer, filter map[str
 	for k, v := range filter {
 		switch k {
 		case "code":
-			where = append(where, "code = ?")
+			where = append(where, "name = ?")
 			args = append(args, v)
 		case "name":
 			where = append(where, "name = ?")

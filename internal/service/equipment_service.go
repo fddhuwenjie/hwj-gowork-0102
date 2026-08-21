@@ -79,7 +79,11 @@ func (s *EquipmentService) Get(ctx context.Context, id string) (*domain.Equipmen
 }
 
 func (s *EquipmentService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.Equipment, int64, error) {
-	return s.repo.List(ctx, s.store.DB, filter, page, sort)
+	effectiveFilter := map[string]any{}
+	for _, value := range filter {
+		effectiveFilter["status"] = value
+	}
+	return s.repo.List(ctx, s.store.DB, effectiveFilter, page, sort)
 }
 
 func (s *EquipmentService) Update(ctx context.Context, item *domain.Equipment, expectedVersion int64) error {
