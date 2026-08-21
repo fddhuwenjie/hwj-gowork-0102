@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"sync"
@@ -20,6 +21,25 @@ func newWorkflowFixture(t *testing.T) (*store.Store, *WorkflowService, *WeldServ
 	ids := platform.RandomIDGenerator{}
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	return st, NewWorkflowService(st, clock, ids, log), NewWeldService(st, clock, ids, log)
+}
+
+func newMethodVersionFixture(t *testing.T) (*store.Store, *MethodVersionService, *domain.MethodVersion) {
+	t.Helper()
+	st, _ := storeTestStore(t)
+	clock := platform.SystemClock{}
+	ids := platform.RandomIDGenerator{}
+	log := slog.New(slog.NewTextHandler(io.Discard, nil))
+	svc := NewMethodVersionService(st, clock, ids, log)
+	ctx := context.Background()
+	mv := domain.NewMethodVersion(ids.New(), time.Now().UTC())
+	mv.Code = "UT"
+	mv.VersionNo = 2026
+	mv.Standard = "NB/T"
+	created, err := svc.Create(ctx, mv, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return st, svc, created
 }
 
 func storeTestStore(t *testing.T) (*store.Store, string) {
@@ -130,4 +150,64 @@ func TestConcurrentVersionConflict(t *testing.T) {
 	if success != 1 {
 		t.Fatalf("expected one successful update, got %d", success)
 	}
+}
+
+// TestMethodVersionTransitionGuard ensures the method-version state machine is
+// enforced at the service boundary: adjacent transitions succeed and advance
+// the version, while skip and self transitions are rejected without bumping
+// the version, recording an audit row, or mutating the stored status.
+func TestMethodVersionTransitionGuard(t *testing.T) {
+	st, mvSvc, mv := newMethodVersionFixture(t)
+	defer st.Close()
+	ctx := context.Background()
+
+	// A skip from draft straight to the deprecated terminal must be rejected.
+	err := mvSvc.Transition(ctx, mv.ID, domain.MethodVersionStatusDeprecated, mv.Version)
+	if !errors.Is(err, domain.ErrInvalidTransition) {
+		t.Fatalf("expected invalid transition for skip, got %v", err)
+	}
+	persisted, err := st.MethodVersion.Get(ctx, st.DB, mv.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if persisted.Status != domain.MethodVersionStatusDraft {
+		t.Fatalf("status mutated after rejected skip: %s", persisted.Status)
+	}
+	if persisted.Version != mv.Version {
+		t.Fatalf("version bumped after rejected skip: %d", persisted.Version)
+	}
+	// No audit row should be recorded for the rejected transition.
+	auditTotal := countAuditFor(ctx, t, st, mv.ID)
+	if auditTotal != 1 {
+		t.Fatalf("expected only the create audit row after rejected skip, got %d", auditTotal)
+	}
+
+	// A self / no-op transition back to the current state is also rejected.
+	if err := mvSvc.Transition(ctx, mv.ID, domain.MethodVersionStatusDraft, mv.Version); !errors.Is(err, domain.ErrInvalidTransition) {
+		t.Fatalf("expected invalid transition for self transition, got %v", err)
+	}
+
+	// The legitimate adjacent transition is still available.
+	if err := mvSvc.Transition(ctx, mv.ID, domain.MethodVersionStatusActive, mv.Version); err != nil {
+		t.Fatalf("expected draft -> active to succeed, got %v", err)
+	}
+	active, err := st.MethodVersion.Get(ctx, st.DB, mv.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if active.Status != domain.MethodVersionStatusActive {
+		t.Fatalf("expected active status, got %s", active.Status)
+	}
+	if active.Version != mv.Version+1 {
+		t.Fatalf("expected version to advance to %d, got %d", mv.Version+1, active.Version)
+	}
+}
+
+func countAuditFor(ctx context.Context, t *testing.T, st *store.Store, entityID string) int {
+	t.Helper()
+	items, _, err := st.AuditRecord.List(ctx, st.DB, map[string]any{"entity_id": entityID}, domain.Page{Page: 1, Size: 100}, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return len(items)
 }

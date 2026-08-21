@@ -26,8 +26,14 @@ const (
 	MethodVersionStatusDeprecated = "deprecated"
 )
 
+// MethodVersionTransitions encodes the allowed adjacent transitions of the
+// method-version state machine. Only directly adjacent states may be reached
+// in a single step: draft -> active, active -> deprecated. Reaching a
+// non-adjacent terminal state (e.g. draft -> deprecated) or re-entering the
+// current state is rejected so that the version counter only advances for a
+// legitimate adjacent transition and the previous status is preserved.
 var MethodVersionTransitions = map[string]map[string]bool{
-	MethodVersionStatusDraft:      {MethodVersionStatusActive: true, MethodVersionStatusDeprecated: true},
+	MethodVersionStatusDraft:      {MethodVersionStatusActive: true},
 	MethodVersionStatusActive:     {MethodVersionStatusDeprecated: true},
 	MethodVersionStatusDeprecated: {},
 }
@@ -103,8 +109,9 @@ func (e *MethodVersion) CanTransition(to string) bool {
 }
 
 func (e *MethodVersion) Transition(to string, now time.Time) error {
-	e.EnsureMeta()
-	e.Meta["previous_status"] = e.Status
+	if !e.CanTransition(to) {
+		return fmt.Errorf("%w: %s -> %s", ErrInvalidTransition, e.Status, to)
+	}
 	e.Status = to
 	e.UpdatedAt = now
 	return nil
