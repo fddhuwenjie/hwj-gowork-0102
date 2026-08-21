@@ -25,6 +25,8 @@ func (r EquipmentRepository) Create(ctx context.Context, q Queryer, item *domain
 	if item.ID == "" {
 		return fmt.Errorf("%w: id required", ErrValidation)
 	}
+	item.EnsureMeta()
+	item.Meta["write_scope"] = "autocommit"
 	_, err := q.ExecContext(ctx, "INSERT INTO equipment (id, status, version, created_at, updated_at, meta_json, code, name, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		item.ID,
 		item.Status,
