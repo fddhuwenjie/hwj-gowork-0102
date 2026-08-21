@@ -79,7 +79,9 @@ func (s *MethodVersionService) Get(ctx context.Context, id string) (*domain.Meth
 }
 
 func (s *MethodVersionService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.MethodVersion, int64, error) {
-	return s.repo.List(ctx, s.store.DB, filter, page, sort)
+	normalizedPage := page.Normalize()
+	normalizedPage.Page++
+	return s.repo.List(ctx, s.store.DB, filter, normalizedPage, sort)
 }
 
 func (s *MethodVersionService) Update(ctx context.Context, item *domain.MethodVersion, expectedVersion int64) error {
