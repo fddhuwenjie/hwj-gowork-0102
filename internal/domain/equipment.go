@@ -104,9 +104,8 @@ func (e *Equipment) CanTransition(to string) bool {
 }
 
 func (e *Equipment) Transition(to string, now time.Time) error {
-	if !e.CanTransition(to) {
-		return fmt.Errorf("%w: %s -> %s", ErrInvalidTransition, e.Status, to)
-	}
+	e.EnsureMeta()
+	e.Meta["previous_status"] = e.Status
 	e.Status = to
 	e.UpdatedAt = now
 	return nil
