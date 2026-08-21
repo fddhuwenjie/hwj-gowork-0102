@@ -26,7 +26,6 @@ func (r ReviewTaskRepository) Create(ctx context.Context, q Queryer, item *domai
 		return fmt.Errorf("%w: id required", ErrValidation)
 	}
 	item.EnsureMeta()
-	item.Meta["write_scope"] = "autocommit"
 	_, err := q.ExecContext(ctx, "INSERT INTO review_tasks (id, status, version, created_at, updated_at, meta_json, report_id, weld_id, reviewer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		item.ID,
 		item.Status,

@@ -59,13 +59,14 @@ func (s *ReviewTaskService) Create(ctx context.Context, item *domain.ReviewTask,
 			}
 		}
 	}
-	if err := s.repo.Create(ctx, s.store.DB, item); err != nil {
-		return nil, err
-	}
-	err := s.store.WithTx(ctx, func(tx store.Queryer) error {
+	// Business and audit must commit together: write both inside one transaction
+	// so an audit failure rolls the review task back too (no half-written record).
+	if err := s.store.WithTx(ctx, func(tx store.Queryer) error {
+		if err := s.repo.Create(ctx, tx, item); err != nil {
+			return err
+		}
 		return s.audit.Create(ctx, tx, &domain.AuditRecord{ID: s.ids.New(), Entity: "reviewtask", EntityID: item.ID, Action: "create", Actor: "system", BeforeJSON: "", AfterJSON: mustJSON(item.ToMap()), CreatedAt: now, UpdatedAt: now, Status: "recorded", Version: 1})
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
 	if idemKey != "" {
