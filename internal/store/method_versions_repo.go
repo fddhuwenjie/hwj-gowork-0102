@@ -26,7 +26,6 @@ func (r MethodVersionRepository) Create(ctx context.Context, q Queryer, item *do
 		return fmt.Errorf("%w: id required", ErrValidation)
 	}
 	item.EnsureMeta()
-	item.Meta["write_scope"] = "autocommit"
 	_, err := q.ExecContext(ctx, "INSERT INTO method_versions (id, status, version, created_at, updated_at, meta_json, code, version_no, standard) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		item.ID,
 		item.Status,
