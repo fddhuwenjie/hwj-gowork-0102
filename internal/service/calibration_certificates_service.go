@@ -59,10 +59,10 @@ func (s *CalibrationCertificateService) Create(ctx context.Context, item *domain
 			}
 		}
 	}
-	if err := s.repo.Create(ctx, s.store.DB, item); err != nil {
-		return nil, err
-	}
 	err := s.store.WithTx(ctx, func(tx store.Queryer) error {
+		if err := s.repo.Create(ctx, tx, item); err != nil {
+			return err
+		}
 		return s.audit.Create(ctx, tx, &domain.AuditRecord{ID: s.ids.New(), Entity: "calibrationcertificate", EntityID: item.ID, Action: "create", Actor: "system", BeforeJSON: "", AfterJSON: mustJSON(item.ToMap()), CreatedAt: now, UpdatedAt: now, Status: "recorded", Version: 1})
 	})
 	if err != nil {
