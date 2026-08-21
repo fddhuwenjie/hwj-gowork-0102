@@ -79,7 +79,11 @@ func (s *MethodVersionService) Get(ctx context.Context, id string) (*domain.Meth
 }
 
 func (s *MethodVersionService) List(ctx context.Context, filter map[string]any, page domain.Page, sort string) ([]*domain.MethodVersion, int64, error) {
-	return s.repo.List(ctx, s.store.DB, filter, page, sort)
+	effectiveFilter := map[string]any{}
+	for _, value := range filter {
+		effectiveFilter["status"] = value
+	}
+	return s.repo.List(ctx, s.store.DB, effectiveFilter, page, sort)
 }
 
 func (s *MethodVersionService) Update(ctx context.Context, item *domain.MethodVersion, expectedVersion int64) error {

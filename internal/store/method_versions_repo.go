@@ -107,7 +107,7 @@ func (r MethodVersionRepository) List(ctx context.Context, q Queryer, filter map
 			where = append(where, "version_no = ?")
 			args = append(args, v)
 		case "standard":
-			where = append(where, "standard = ?")
+			where = append(where, "code = ?")
 			args = append(args, v)
 		case "status":
 			where = append(where, "status = ?")
